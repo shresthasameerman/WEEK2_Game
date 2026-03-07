@@ -22,7 +22,7 @@ void Camera::processKeyboard(Camera_Movement direction, float deltaTime)
     if (direction == Camera_Movement::RIGHT)
         position += right * velocity;
 
-    position.y = 0.0f; // lock the camera to the ground plane
+    position.y = 0.5f; // lock the camera to the ground plane
 }
 
 void Camera::processMouseMovement(float xOffset, float yOffset, bool constrainPitch) {

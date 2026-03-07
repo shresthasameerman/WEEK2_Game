@@ -40,7 +40,9 @@ add_executable(DoomWeek ${SOURCES}
         src/core/camera.h
         src/core/camera.cpp
         src/core/Shader.h
-        src/core/Shader.cpp)
+        src/core/Shader.cpp
+        src/World/Level.cpp
+        src/World/Level.h)
 
 target_include_directories(DoomWeek PRIVATE
         ${CMAKE_SOURCE_DIR}/src
@@ -54,4 +56,15 @@ target_link_libraries(DoomWeek PRIVATE
         GL
         dl
         pthread
+)
+
+FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb.git
+        GIT_TAG master
+)
+
+FetchContent_MakeAvailable(stb)
+target_include_directories(DoomWeek PRIVATE
+        ${stb_SOURCE_DIR}
 )

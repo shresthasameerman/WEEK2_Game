@@ -5,13 +5,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "core/Shader.h"
+#include "World/Level.h"
 
 // screen dimensions
 const unsigned int SCR_WIDTH  = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(1.5f, 0.5f, 1.5f));
 float lastX = SCR_WIDTH  / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -72,6 +73,8 @@ int main()
         return -1;
     }
 
+    glEnable(GL_DEPTH_TEST);
+
     // capture mouse, register callbacks
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallback);
@@ -79,73 +82,8 @@ int main()
 
     Shader worldShader(VERT_PATH, FRAG_PATH);
 
-    //a simple coloured cube - 6 faces,2 triangles per face, 3 vertices per triangle = 36 vertices
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f, 0.8f, 0.2f, 0.2f, // back face
-         0.5f, -0.5f, -0.5f, 0.8f, 0.2f, 0.2f,
-         0.5f,  0.5f, -0.5f, 0.8f, 0.2f, 0.2f,
-         0.5f,  0.5f, -0.5f, 0.8f, 0.2f, 0.2f,
-        -0.5f,  0.5f, -0.5f, 0.8f, 0.2f, 0.2f,
-        -0.5f, -0.5f, -0.5f, 0.8f, 0.2f, 0.2f,
-
-        -0.5f, -0.5f, 0.5f, 0.2f, 0.8f, 0.2f, // front face
-         0.5f, -0.5f, 0.5f, 0.2f, 0.8f, 0.2f,
-         0.5f,  0.5f, 0.5f, 0.2f, 0.8f, 0.2f,
-         0.5f,  0.5f, 0.5f, 0.2f, 0.8f, 0.2f,
-        -0.5f,  0.5f, 0.5f, 0.2f, 0.8f, 0.2f,
-        -0.5f, -0.5f, 0.5f, 0.2f, 0.8f, 0.2f,
-
-
-        -0.5f,  0.5f,  0.5f, 0.2f, 0.2f, 0.8f, // left face
-        -0.5f,  0.5f, -0.5f, 0.2f, 0.2f, 0.8f,
-        -0.5f, -0.5f, -0.5f, 0.2f, 0.2f, 0.8f,
-        -0.5f, -0.5f, -0.5f, 0.2f, 0.2f, 0.8f,
-        -0.5f, -0.5f,  0.5f, 0.2f, 0.2f, 0.8f,
-        -0.5f,  0.5f,  0.5f, 0.2f, 0.2f, 0.8f,
-
-        0.5f, 0.5f,  0.5f, 0.8f, 0.8f, 0.2f, // right face
-        0.5f, 0.5f, -0.5f, 0.8f, 0.8f, 0.2f,
-        0.5f, -0.5f, -0.5f, 0.8f, 0.8f, 0.2f,
-        0.5f, -0.5f, -0.5f, 0.8f, 0.8f, 0.2f,
-        0.5f, -0.5f,  0.5f, 0.8f, 0.8f, 0.2f,
-        0.5f,  0.5f,  0.5f, 0.8f, 0.8f, 0.2f,
-
-        -0.5f, -0.5f, -0.5f, 0.8f, 0.2f, 0.8f, // bottom face
-         0.5f, -0.5f, -0.5f, 0.8f, 0.2f, 0.8f,
-         0.5f, -0.5f,  0.5f, 0.8f, 0.2f, 0.8f,
-         0.5f, -0.5f,  0.5f, 0.8f, 0.2f, 0.8f,
-        -0.5f, -0.5f,  0.5f, 0.8f, 0.2f, 0.8f,
-        -0.5f, -0.5f, -0.5f, 0.8f, 0.2f, 0.8f,
-
-        0.5f, 0.5f, -0.5f, 0.2f, 0.8f, 0.8f, // top face
-        -0.5f, 0.5f, -0.5f, 0.2f, 0.8f, 0.8f,
-        -0.5f, 0.5f,  0.5f, 0.2f, 0.8f, 0.8f,
-        -0.5f, 0.5f,  0.5f, 0.2f, 0.8f, 0.8f,
-         0.5f, 0.5f,  0.5f, 0.2f, 0.8f, 0.8f,
-         0.5f, 0.5f, -0.5f, 0.2f, 0.8f, 0.8f,
-    };
-    //create vertex array object and vertex buffer object
-    unsigned int VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    //bind the VAO and VBO, upload the vertex data, and set the vertex attribute pointers
-    glBindVertexArray(VAO);
-
-    //upload vertex data to the GPU
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    //tell OpenGL how to read the position (location = 0)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    //tell OpenGL how to read the color (location = 1)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
-
+    Level level;
+    level.build();
 
     // game loop
     while (!glfwWindowShouldClose(window)) {
@@ -186,10 +124,8 @@ int main()
         worldShader.setMat4("uView", view);
         worldShader.setMat4("uProjection", projection);
 
-        //render the cube
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        //render the level
+        level.draw(worldShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
