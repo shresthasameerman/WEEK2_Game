@@ -36,7 +36,11 @@ FetchContent_MakeAvailable(glm)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
-add_executable(DoomWeek ${SOURCES})
+add_executable(DoomWeek ${SOURCES}
+        src/core/camera.h
+        src/core/camera.cpp
+        src/core/Shader.h
+        src/core/Shader.cpp)
 
 target_include_directories(DoomWeek PRIVATE
         ${CMAKE_SOURCE_DIR}/src
