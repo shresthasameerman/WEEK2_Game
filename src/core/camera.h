@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <functional>
 
 enum class Camera_Movement {
     FORWARD,
@@ -48,7 +49,7 @@ public:
     glm::mat4 getViewMatrix();
 
     //processes input from keyboard
-    void processKeyboard(Camera_Movement direction, float deltaTime);
+    void processKeyboard(Camera_Movement direction, float deltaTime, std::function<bool(float, float)> isWall);
 
     //processes mouse input
     void processMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);

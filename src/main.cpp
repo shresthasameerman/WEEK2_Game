@@ -95,14 +95,35 @@ int main()
         // movement input
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
+
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.processKeyboard(Camera_Movement::FORWARD, deltaTime);
+            camera.processKeyboard(Camera_Movement::FORWARD, deltaTime, [](float x, float z) {
+                int col = (int)x;
+                int row = (int)z;
+                if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
+                return MAP[row][col] == 1;
+            });
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.processKeyboard(Camera_Movement::BACKWARD, deltaTime);
+            camera.processKeyboard(Camera_Movement::BACKWARD, deltaTime, [](float x, float z) {
+                int col = (int)x;
+                int row = (int)z;
+                if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
+                return MAP[row][col] == 1;
+            });
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.processKeyboard(Camera_Movement::LEFT, deltaTime);
+            camera.processKeyboard(Camera_Movement::LEFT, deltaTime, [](float x, float z) {
+                int col = (int)x;
+                int row = (int)z;
+                if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
+                return MAP[row][col] == 1;
+            });
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.processKeyboard(Camera_Movement::RIGHT, deltaTime);
+            camera.processKeyboard(Camera_Movement::RIGHT, deltaTime, [](float x, float z) {
+                int col = (int)x;
+                int row = (int)z;
+                if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
+                return MAP[row][col] == 1;
+            });
 
         glClearColor(0.1f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

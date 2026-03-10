@@ -35,9 +35,11 @@ void Level::addQuad(std::vector<float>& verts, glm::vec3 p1, glm::vec3 p2, glm::
 void Level::build() {
     std::vector<float> verts;
 
-    glm::vec3 wallColor    = glm::vec3(0.8f, 0.5f, 0.4f);
+    glm::vec3 wallNS    = glm::vec3(0.6f, 0.35f, 0.25f); // north/south - darker
+    glm::vec3 wallEW    = glm::vec3(0.9f, 0.6f, 0.45f);  // east/west - brighter
     glm::vec3 floorColor   = glm::vec3(0.3f, 0.3f, 0.3f);
-    glm::vec3 ceilingColor = glm::vec3(0.15f, 0.15f, 0.15f);
+    glm::vec3 ceilingColor = glm::vec3(0.12f, 0.12f, 0.12f);
+
 
     for (int row = 0; row < MAP_HEIGHT; row++) {
         for (int col = 0; col < MAP_WIDTH; col++) {
@@ -70,7 +72,7 @@ void Level::build() {
                         glm::vec3(x + 1.0f, -0.05f, z + 1.0f),
                         glm::vec3(x + 1.0f,  1.05f, z + 1.0f),
                         glm::vec3(x,         1.05f, z + 1.0f),
-                        wallColor);
+                        wallNS);
 
                 // north
                 if (row - 1 >= 0 && MAP[row - 1][col] == 0)
@@ -79,7 +81,7 @@ void Level::build() {
                         glm::vec3(x,        -0.05f, z),
                         glm::vec3(x,         1.05f, z),
                         glm::vec3(x + 1.0f,  1.05f, z),
-                        wallColor);
+                        wallNS);
 
                 // east
                 if (col + 1 < MAP_WIDTH && MAP[row][col + 1] == 0)
@@ -88,7 +90,7 @@ void Level::build() {
                         glm::vec3(x + 1.0f, -0.05f, z + 1.0f),
                         glm::vec3(x + 1.0f,  1.05f, z + 1.0f),
                         glm::vec3(x + 1.0f,  1.05f, z),
-                        wallColor);
+                        wallEW);
 
                 // west
                 if (col - 1 >= 0 && MAP[row][col - 1] == 0)
@@ -97,7 +99,7 @@ void Level::build() {
                         glm::vec3(x, -0.05f, z),
                         glm::vec3(x,  1.05f, z),
                         glm::vec3(x,  1.05f, z + 1.0f),
-                        wallColor);
+                        wallEW);
             }
         }
     }

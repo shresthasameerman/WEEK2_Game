@@ -6,21 +6,31 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <cmath>
 
+
 glm::mat4 Camera::getViewMatrix() {
     return glm::lookAt(position, position + front, up);
 }
 
-void Camera::processKeyboard(Camera_Movement direction, float deltaTime)
+void Camera::processKeyboard(Camera_Movement direction, float deltaTime, std::function<bool(float, float)> isWall)
 {
     float velocity = movementSpeed * deltaTime;
+    glm::vec3 newPos = position;
     if (direction == Camera_Movement::FORWARD)
-        position += front * velocity;
+        newPos += front * velocity;
     if (direction == Camera_Movement::BACKWARD)
-        position -= front * velocity;
+        newPos -= front * velocity;
     if (direction == Camera_Movement::LEFT)
-        position -= right * velocity;
+        newPos -= right * velocity;
     if (direction == Camera_Movement::RIGHT)
-        position += right * velocity;
+        newPos += right * velocity;
+
+    float radius = 0.2f; // collision radius
+
+    if (!isWall(newPos.x + radius,position.z) && !isWall(newPos.x - radius, position.z))
+        position.x = newPos.x;
+
+    if (!isWall(position.x, newPos.z + radius) && !isWall(position.x, newPos.z - radius))
+        position.z = newPos.z;
 
     position.y = 0.5f; // lock the camera to the ground plane
 }
