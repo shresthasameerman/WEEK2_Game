@@ -130,6 +130,7 @@ int main()
 
         //activate shader
         worldShader.use();
+        worldShader.setFloat("uTime", (float)glfwGetTime());
 
         //build matrices
         glm::mat4 model = glm::mat4(1.0f);
