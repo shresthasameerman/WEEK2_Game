@@ -6,22 +6,24 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "core/Shader.h"
 #include "World/Level.h"
+#include "core/mesh.h"
 
-// screen dimensions
+const char* VERT_PATH     = "assets/shaders/world.vert";
+const char* FRAG_PATH     = "assets/shaders/world.frag";
+const char* GUN_VERT_PATH = "assets/shaders/gun.vert";
+const char* GUN_FRAG_PATH = "assets/shaders/gun.frag";
+
 const unsigned int SCR_WIDTH  = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
-// camera
 Camera camera(glm::vec3(1.5f, 0.5f, 1.5f));
 float lastX = SCR_WIDTH  / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
-// timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-// mouse callback - called by GLFW every time the mouse moves
 void mouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
     if (firstMouse) {
@@ -36,17 +38,13 @@ void mouseCallback(GLFWwindow* window, double xPos, double yPos)
     camera.processMouseMovement(xOffset, yOffset);
 }
 
-// scroll callback - called by GLFW every time the scroll wheel moves
 void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
     camera.processMouseScroll(yOffset);
 }
-const char* VERT_PATH = "assets/shaders/world.vert";
-const char* FRAG_PATH = "assets/shaders/world.frag";
 
 int main()
 {
-
     std::cout << "DoomWeek engine starting...\n";
 
     if (!glfwInit()) {
@@ -75,52 +73,50 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    // capture mouse, register callbacks
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
 
     Shader worldShader(VERT_PATH, FRAG_PATH);
+    Shader gunShader(GUN_VERT_PATH, GUN_FRAG_PATH);
 
     Level level;
     level.build();
 
-    // game loop
+    Mesh gunMesh;
+    if (!gunMesh.load("/home/sameer/Documents/C++GameDEV/DoomWeek/assets/models/Pistol/PistolFinal.obj",
+                  "/home/sameer/Documents/C++GameDEV/DoomWeek/assets/models/Pistol/ZenUV_Generic_Material.001_BaseColor.1001.png"))
+        std::cerr << "Failed to load gun\n";
+
     while (!glfwWindowShouldClose(window)) {
-        // delta time
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // movement input
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
             camera.processKeyboard(Camera_Movement::FORWARD, deltaTime, [](float x, float z) {
-                int col = (int)x;
-                int row = (int)z;
+                int col = (int)x; int row = (int)z;
                 if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
                 return MAP[row][col] == 1;
             });
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
             camera.processKeyboard(Camera_Movement::BACKWARD, deltaTime, [](float x, float z) {
-                int col = (int)x;
-                int row = (int)z;
+                int col = (int)x; int row = (int)z;
                 if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
                 return MAP[row][col] == 1;
             });
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
             camera.processKeyboard(Camera_Movement::LEFT, deltaTime, [](float x, float z) {
-                int col = (int)x;
-                int row = (int)z;
+                int col = (int)x; int row = (int)z;
                 if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
                 return MAP[row][col] == 1;
             });
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
             camera.processKeyboard(Camera_Movement::RIGHT, deltaTime, [](float x, float z) {
-                int col = (int)x;
-                int row = (int)z;
+                int col = (int)x; int row = (int)z;
                 if (row < 0 || row >= MAP_HEIGHT || col < 0 || col >= MAP_WIDTH) return true;
                 return MAP[row][col] == 1;
             });
@@ -128,26 +124,34 @@ int main()
         glClearColor(0.1f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //activate shader
+        // render level
         worldShader.use();
         worldShader.setFloat("uTime", (float)glfwGetTime());
-
-        //build matrices
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view  = camera.getViewMatrix();
-        glm::mat4 projection = glm::perspective(
+        worldShader.setMat4("uModel", glm::mat4(1.0f));
+        worldShader.setMat4("uView", camera.getViewMatrix());
+        worldShader.setMat4("uProjection", glm::perspective(
             glm::radians(camera.fov),
-            (float)SCR_WIDTH / (float)SCR_HEIGHT,
-            0.1f,
-            100.0f
-        );
-        //set matrices to shader
-        worldShader.setMat4("uModel", model);
-        worldShader.setMat4("uView", view);
-        worldShader.setMat4("uProjection", projection);
-
-        //render the level
+            (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f));
         level.draw(worldShader);
+
+        // render gun
+        glClear(GL_DEPTH_BUFFER_BIT);
+        gunShader.use();
+
+        glm::mat4 gunModel = glm::mat4(1.0f);
+
+        gunModel = glm::translate(gunModel, glm::vec3(0.38f, -0.22f, -0.5f));
+        gunModel = glm::rotate(gunModel, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        gunModel = glm::rotate(gunModel, glm::radians(-10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        gunModel = glm::scale(gunModel, glm::vec3(0.025f, 0.025f, 0.025f));
+
+        gunShader.setMat4("uModel", gunModel);
+        gunShader.setMat4("uView", glm::mat4(1.0f));
+        gunShader.setMat4("uProjection", glm::perspective(
+            glm::radians(60.0f),
+            (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.01f, 10.0f));
+
+        gunMesh.draw(gunShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

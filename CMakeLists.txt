@@ -10,7 +10,7 @@ include(FetchContent)
 FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG 3.4
+        GIT_TAG        3.4
 )
 set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
@@ -20,33 +20,43 @@ FetchContent_MakeAvailable(glfw)
 FetchContent_Declare(
         glad
         GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-        GIT_TAG v0.1.36
+        GIT_TAG        v0.1.36
 )
 set(GLAD_PROFILE   "core" CACHE STRING "OpenGL profile")
 set(GLAD_API       "gl=3.3" CACHE STRING "API version")
-set(GLAD_GENERATOR "c" CACHE STRING "Language")
+set(GLAD_GENERATOR "c"     CACHE STRING "Language")
 FetchContent_MakeAvailable(glad)
 
 FetchContent_Declare(
         glm
         GIT_REPOSITORY https://github.com/g-truc/glm.git
-        GIT_TAG 0.9.9.8
+        GIT_TAG        0.9.9.8
 )
 FetchContent_MakeAvailable(glm)
 
-file(GLOB_RECURSE SOURCES src/*.cpp)
+FetchContent_Declare(
+        stb
+        GIT_REPOSITORY https://github.com/nothings/stb.git
+        GIT_TAG        master
+)
+FetchContent_MakeAvailable(stb)
 
+FetchContent_Declare(
+        tinyobjloader
+        GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
+        GIT_TAG        release
+)
+FetchContent_MakeAvailable(tinyobjloader)
+
+file(GLOB_RECURSE SOURCES src/*.cpp)
 add_executable(DoomWeek ${SOURCES}
-        src/core/camera.h
-        src/core/camera.cpp
-        src/core/Shader.h
-        src/core/Shader.cpp
-        src/World/Level.cpp
-        src/World/Level.h)
+        src/core/mesh.cpp
+        src/core/mesh.h)
 
 target_include_directories(DoomWeek PRIVATE
         ${CMAKE_SOURCE_DIR}/src
         ${glad_SOURCE_DIR}/include
+        ${stb_SOURCE_DIR}
 )
 
 target_link_libraries(DoomWeek PRIVATE
@@ -56,15 +66,5 @@ target_link_libraries(DoomWeek PRIVATE
         GL
         dl
         pthread
-)
-
-FetchContent_Declare(
-        stb
-        GIT_REPOSITORY https://github.com/nothings/stb.git
-        GIT_TAG master
-)
-
-FetchContent_MakeAvailable(stb)
-target_include_directories(DoomWeek PRIVATE
-        ${stb_SOURCE_DIR}
+        tinyobjloader
 )
