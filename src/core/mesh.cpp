@@ -107,6 +107,8 @@ void Mesh::draw(Shader& shader)
         shader.setBool("uUseTexture", false);
     }
 
+    shader.setVec3("uTint", glm::vec3(1.0f, 1.0f, 1.0f)); // ← ADD THIS
+
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, m_vertexCount);
     glBindVertexArray(0);

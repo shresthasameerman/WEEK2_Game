@@ -51,7 +51,9 @@ FetchContent_MakeAvailable(tinyobjloader)
 file(GLOB_RECURSE SOURCES src/*.cpp)
 add_executable(DoomWeek ${SOURCES}
         src/core/mesh.cpp
-        src/core/mesh.h)
+        src/core/mesh.h
+        src/World/Sprite.cpp
+        src/World/Sprite.h)
 
 target_include_directories(DoomWeek PRIVATE
         ${CMAKE_SOURCE_DIR}/src
